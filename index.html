@@ -1,0 +1,66 @@
+ <!DOCTYPE html>
+<html>
+<head>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { text-align: center; background: #222; color: white; font-family: sans-serif; }
+        #canvas { margin-top: 20px; transition: transform 4s cubic-bezier(0.1, 0, 0.2, 1); }
+        .pointer { width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 30px solid red; margin: 0 auto; }
+        button { padding: 10px 20px; font-size: 18px; margin-top: 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Колесо Фортуны</h1>
+    <div class="pointer"></div>
+    <canvas id="canvas" width="300" height="300"></canvas>
+    <br>
+    <button onclick="spin()">Крутить!</button>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Развернуть на весь экран
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const prizes = ["100 XP", "Скидка 5%", "Пусто", "Джекпот", "Скидка 10%", "Попробуй еще"];
+        const colors = ['#f1c40f', '#e67e22', '#e74c3c', '#9b59b6', '#3498db', '#2ecc71'];
+
+        // Отрисовка колеса
+        function drawWheel() {
+            const arc = Math.PI / (prizes.length / 2);
+            prizes.forEach((prize, i) => {
+                ctx.beginPath();
+                ctx.fillStyle = colors[i];
+                ctx.moveTo(150, 150);
+                ctx.arc(150, 150, 150, i * arc, (i + 1) * arc);
+                ctx.fill();
+                ctx.stroke();
+                ctx.save();
+                ctx.translate(150, 150);
+                ctx.rotate(i * arc + arc / 2);
+                ctx.fillStyle = "white";
+                ctx.fillText(prize, 70, 5);
+                ctx.restore();
+            });
+        }
+        drawWheel();
+
+        function spin() {
+            // "ПОДКРУТКА": Вместо рандома (Math.random()) 
+            // сервер должен вернуть ID приза.
+            // Например, мы всегда хотим, чтобы выпало "Скидка 5%" (индекс 1)
+            const prizeIndex = 1; // Тут можно менять логику
+            
+            const degreesPerPrize = 360 / prizes.length;
+            const extraSpins = 5 * 360; // 5 полных оборотов для эффекта
+            const finalDegree = extraSpins + (360 - (prizeIndex * degreesPerPrize));
+
+            canvas.style.transform = `rotate(${finalDegree}deg)`;
+
+            setTimeout(() => {
+                tg.showAlert("Ваш приз: " + prizes[prizeIndex]);
+            }, 4500);
+        }
+    </script>
+</body>
+</html>
