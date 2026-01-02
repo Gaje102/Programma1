@@ -1,0 +1,34 @@
+templates/index.html (твое колесо)
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { text-align: center; font-family: sans-serif; background: #1a1a1a; color: white; }
+        #wheel { width: 300px; height: 300px; border-radius: 50%; border: 5px solid gold; margin: 20px auto; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
+        button { padding: 15px 30px; font-size: 18px; background: gold; border: none; border-radius: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Колесо Фортуны</h1>
+    <div id="wheel">🎡</div>
+    <br>
+    <button onclick="payForSpin()">Крутить за 50 ⭐</button>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        async function payForSpin() {
+            const res = await fetch('/create-invoice', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ user_id: tg.initDataUnsafe.user.id })
+            });
+            const data = await res.json();
+            tg.openInvoice(data.link, (status) => {
+                if (status === 'paid') alert('Оплачено! Колесо крутится...');
+            });
+        }
+    </script>
+</body>
+</html>
+
